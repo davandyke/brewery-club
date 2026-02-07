@@ -79,50 +79,52 @@ export async function GET(req: Request) {
         // 3. Process & Upsert Breweries
         if (breweriesData && Array.isArray(breweriesData)) {
             for (const b of breweriesData) {
+                const loc = (b as any).location || {}
+                // Type casting b as any because interface VisitWidgetPlace is distinct from actual response
+                // We should update interface but for now 'any' works to unblock.
+                const anyB = b as any
+
                 await prisma.brewery.upsert({
                     where: { visitWidgetId: String(b.id) },
                     update: {
-                        name: b.title,
-                        address: b.address,
-                        city: b.city,
+                        name: anyB.name || b.title,
+                        address: loc.address || b.address,
+                        city: loc.city_from_address || b.city,
                         state: b.state,
                         zip: b.zip,
-                        latitude: b.latitude ? parseFloat(b.latitude) : null,
-                        longitude: b.longitude ? parseFloat(b.longitude) : null,
+                        latitude: loc.latitude || (b.latitude ? parseFloat(b.latitude) : null),
+                        longitude: loc.longitude || (b.longitude ? parseFloat(b.longitude) : null),
                         description: b.description,
-                        heroImage: b.image?.url,
-                        websiteUrl: b.website,
+                        heroImage: anyB.cover_photo_url || anyB.thumbnail_url || b.image?.url,
+                        websiteUrl: anyB.website || b.website,
                     },
                     create: {
                         visitWidgetId: String(b.id),
-                        name: b.title,
-                        address: b.address,
-                        city: b.city,
+                        name: anyB.name || b.title,
+                        address: loc.address || b.address,
+                        city: loc.city_from_address || b.city,
                         state: b.state,
                         zip: b.zip,
-                        latitude: b.latitude ? parseFloat(b.latitude) : null,
-                        longitude: b.longitude ? parseFloat(b.longitude) : null,
+                        latitude: loc.latitude || (b.latitude ? parseFloat(b.latitude) : null),
+                        longitude: loc.longitude || (b.longitude ? parseFloat(b.longitude) : null),
                         description: b.description,
-                        heroImage: b.image?.url,
-                        websiteUrl: b.website,
+                        heroImage: anyB.cover_photo_url || anyB.thumbnail_url || b.image?.url,
+                        websiteUrl: anyB.website || b.website,
                     }
                 })
             }
         }
 
         // 4. Process & Upsert Events
-        // Note: Linking events to breweries might require matching place_id if provided in event data,
-        // or string matching on location name.
         if (eventsData && Array.isArray(eventsData)) {
             for (const e of eventsData) {
-                // Try to find associated brewery if possible
+                const anyE = e as any
+                // Link event to brewery if place_id matches
                 let breweryId = null
 
-                // Logic to link event to brewery goes here.
-                // If e.place_id exists, we can link it easily.
-                if (e.place_id) {
+                if (anyE.place_id) {
                     const brewery = await prisma.brewery.findUnique({
-                        where: { visitWidgetId: String(e.place_id) }
+                        where: { visitWidgetId: String(anyE.place_id) }
                     })
                     if (brewery) breweryId = brewery.id
                 }
@@ -130,24 +132,24 @@ export async function GET(req: Request) {
                 await prisma.event.upsert({
                     where: { visitWidgetId: String(e.id) },
                     update: {
-                        title: e.title,
+                        title: anyE.name || e.title,
                         description: e.description,
-                        startDate: e.start_date ? new Date(e.start_date) : new Date(), // Fallback
-                        endDate: e.end_date ? new Date(e.end_date) : null,
-                        location: e.location,
-                        url: e.website,
-                        imageUrl: e.image?.url,
+                        startDate: anyE.starts_on ? new Date(anyE.starts_on) : (e.start_date ? new Date(e.start_date) : new Date()),
+                        endDate: anyE.ends_on ? new Date(anyE.ends_on) : (e.end_date ? new Date(e.end_date) : null),
+                        location: anyE.location?.address || e.location,
+                        url: anyE.website || e.website,
+                        imageUrl: anyE.cover_photo_url || e.image?.url,
                         breweryId: breweryId,
                     },
                     create: {
                         visitWidgetId: String(e.id),
-                        title: e.title,
+                        title: anyE.name || e.title,
                         description: e.description,
-                        startDate: e.start_date ? new Date(e.start_date) : new Date(),
-                        endDate: e.end_date ? new Date(e.end_date) : null,
-                        location: e.location,
-                        url: e.website,
-                        imageUrl: e.image?.url,
+                        startDate: anyE.starts_on ? new Date(anyE.starts_on) : (e.start_date ? new Date(e.start_date) : new Date()),
+                        endDate: anyE.ends_on ? new Date(anyE.ends_on) : (e.end_date ? new Date(e.end_date) : null),
+                        location: anyE.location?.address || e.location,
+                        url: anyE.website || e.website,
+                        imageUrl: anyE.cover_photo_url || e.image?.url,
                         breweryId: breweryId,
                     }
                 })
