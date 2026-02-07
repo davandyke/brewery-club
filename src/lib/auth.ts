@@ -15,7 +15,8 @@ export const authOptions: NextAuthOptions = {
         async session({ session, user }) {
             if (session.user) {
                 session.user.id = user.id
-                // Add other custom fields if needed, e.g. isAdmin
+                session.user.isAdmin = user.isAdmin
+                session.user.isApproved = user.isApproved
             }
             return session
         }
