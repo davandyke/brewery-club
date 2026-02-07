@@ -1,10 +1,10 @@
 import { NextAuthOptions } from "next-auth"
 import FacebookProvider from "next-auth/providers/facebook"
-import { PrismaAdapter } from "@next-auth/prisma-adapter"
+import { PrismaAdapter } from "@auth/prisma-adapter"
 import { prisma } from "./prisma"
 
 export const authOptions: NextAuthOptions = {
-    adapter: PrismaAdapter(prisma),
+    adapter: PrismaAdapter(prisma) as any,
     providers: [
         FacebookProvider({
             clientId: process.env.FACEBOOK_CLIENT_ID!,
