@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth'
 import { LoginButton } from '@/components/LoginButton'
 import { CheckInButton } from '@/components/CheckInButton'
 import { BulkEditor } from '@/components/BulkEditor'
+import { DecisionWheel } from '@/components/DecisionWheel'
 
 export const revalidate = 0 // Dynamic now because of user session
 
@@ -69,24 +70,18 @@ export default async function Home() {
           </p>
         </div>
 
-        {/* Progress Section (Only if logged in) */}
+        {/* Decision Support Section (Only if logged in) */}
         {user && (
-          <div className="bg-neutral-800 p-6 rounded-2xl border border-neutral-700">
-            <div className="flex justify-between items-end mb-2">
-              <h2 className="text-2xl font-bold text-white">Your Brewsader Progress</h2>
-              <span className="text-3xl font-black text-amber-500">{visitedCount} <span className="text-lg text-neutral-500 font-medium">/ {totalCount}</span></span>
-            </div>
-            <div className="w-full bg-neutral-700 rounded-full h-4 overflow-hidden mb-4">
-              <div
-                className="bg-gradient-to-r from-amber-600 to-amber-400 h-4 rounded-full transition-all duration-1000 ease-out"
-                style={{ width: `${progressPercentage}%` }}
-              ></div>
-            </div>
+          <div className="space-y-8">
+            <DecisionWheel options={sortedBreweries.filter(b => !checkInIds.has(b.id))} />
 
-            <div className="flex justify-between items-center bg-neutral-900/50 p-3 rounded-lg">
-              <p className="text-sm text-neutral-300">
-                Manage your progress:
-              </p>
+            <div className="bg-neutral-800/50 border border-neutral-700 p-4 rounded-xl flex flex-col sm:flex-row justify-between items-center gap-4">
+              <div>
+                <h2 className="font-bold text-white text-lg">Your Filtered List</h2>
+                <p className="text-neutral-400 text-sm">
+                  {totalCount - visitedCount} places left to visit • {visitedCount} hidden
+                </p>
+              </div>
               <BulkEditor
                 breweries={breweries}
                 initialCheckedIds={Array.from(checkInIds)}
