@@ -73,13 +73,13 @@ export default async function Home() {
         {/* Decision Support Section (Only if logged in) */}
         {user && (
           <div className="space-y-8">
-            <DecisionWheel options={sortedBreweries.filter(b => !checkInIds.has(b.id))} />
+            <DecisionWheel options={sortedBreweries.filter(b => checkInIds.has(b.id))} />
 
             <div className="bg-neutral-800/50 border border-neutral-700 p-4 rounded-xl flex flex-col sm:flex-row justify-between items-center gap-4">
               <div>
-                <h2 className="font-bold text-white text-lg">Your Filtered List</h2>
+                <h2 className="font-bold text-white text-lg">My Shortlist</h2>
                 <p className="text-neutral-400 text-sm">
-                  {totalCount - visitedCount} places left to visit • {visitedCount} hidden
+                  {visitedCount} places selected for the wheel
                 </p>
               </div>
               <BulkEditor

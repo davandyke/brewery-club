@@ -71,7 +71,7 @@ export function BulkEditor({ breweries, initialCheckedIds }: Props) {
             <div className="bg-neutral-900 border border-neutral-700 rounded-xl w-full max-w-lg flex flex-col max-h-[90vh] shadow-2xl">
                 {/* Header */}
                 <div className="p-4 border-b border-neutral-800 flex justify-between items-center">
-                    <h2 className="text-lg font-bold text-white">Manage Your Visits</h2>
+                    <h2 className="text-lg font-bold text-white">Select Potential Stops</h2>
                     <button
                         onClick={() => setIsOpen(false)}
                         className="text-neutral-400 hover:text-white"
