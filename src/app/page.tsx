@@ -1,15 +1,37 @@
 import { prisma } from '@/lib/prisma'
-
-// Import LoginButton - we might need to make this a client component or import purely
-// But since LoginButton is 'use client', it can be imported in server component 'page.tsx'.
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
 import { LoginButton } from '@/components/LoginButton'
+import { CheckInButton } from '@/components/CheckInButton'
 
-export const revalidate = 3600 // Revalidate at least every hour
+export const revalidate = 0 // Dynamic now because of user session
 
 export default async function Home() {
+  const session = await getServerSession(authOptions)
+  const user = session?.user?.email
+    ? await prisma.user.findUnique({
+      where: { email: session.user.email },
+      include: { checkIns: true }
+    })
+    : null
+
+  const checkInIds = new Set(user?.checkIns.map(c => c.breweryId) || [])
+
   const breweries = await prisma.brewery.findMany({
     orderBy: { name: 'asc' },
   })
+
+  // Sort: Unvisited first, then Visited
+  const sortedBreweries = [...breweries].sort((a, b) => {
+    const aVisited = checkInIds.has(a.id)
+    const bVisited = checkInIds.has(b.id)
+    if (aVisited === bVisited) return 0
+    return aVisited ? 1 : -1 // Visited goes to bottom
+  })
+
+  const visitedCount = checkInIds.size
+  const totalCount = breweries.length
+  const progressPercentage = totalCount > 0 ? Math.round((visitedCount / totalCount) * 100) : 0
 
   // Fetch events starting from today onwards
   const events = await prisma.event.findMany({
@@ -42,6 +64,23 @@ export default async function Home() {
             Discover local brews, track your visits, and join the community in Grand Rapids, MI.
           </p>
         </div>
+
+        {/* Progress Section (Only if logged in) */}
+        {user && (
+          <div className="bg-neutral-800 p-6 rounded-2xl border border-neutral-700">
+            <div className="flex justify-between items-end mb-2">
+              <h2 className="text-2xl font-bold text-white">Your Brewsader Progress</h2>
+              <span className="text-3xl font-black text-amber-500">{visitedCount} <span className="text-lg text-neutral-500 font-medium">/ {totalCount}</span></span>
+            </div>
+            <div className="w-full bg-neutral-700 rounded-full h-4 overflow-hidden">
+              <div
+                className="bg-gradient-to-r from-amber-600 to-amber-400 h-4 rounded-full transition-all duration-1000 ease-out"
+                style={{ width: `${progressPercentage}%` }}
+              ></div>
+            </div>
+            <p className="text-right text-sm text-neutral-400 mt-2">{totalCount - visitedCount} breweries left to visit!</p>
+          </div>
+        )}
 
         {/* Upcoming Events Section */}
         <section className="space-y-8">
@@ -101,22 +140,42 @@ export default async function Home() {
             <p className="text-neutral-500 italic">No breweries found. Scraper might need to run.</p>
           ) : (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              {breweries.map((brewery) => (
-                <div key={brewery.id} className="bg-neutral-800 p-4 rounded-lg border border-neutral-700 hover:bg-neutral-750 transition-colors">
-                  <h3 className="font-bold text-lg text-white truncate">{brewery.name}</h3>
-                  <p className="text-sm text-neutral-400 truncate">{brewery.address}, {brewery.city}</p>
-                  {brewery.websiteUrl && (
-                    <a
-                      href={brewery.websiteUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="text-xs text-amber-500 hover:text-amber-400 mt-2 inline-block"
-                    >
-                      Visit Website &rarr;
-                    </a>
-                  )}
-                </div>
-              ))}
+              {sortedBreweries.map((brewery) => {
+                const isVisited = checkInIds.has(brewery.id)
+                return (
+                  <div
+                    key={brewery.id}
+                    className={`p-4 rounded-lg border transition-all duration-300 relative group
+                            ${isVisited
+                        ? 'bg-neutral-900 border-neutral-800 opacity-60 hover:opacity-100'
+                        : 'bg-neutral-800 border-neutral-700 hover:border-amber-500 shadow-lg'
+                      }
+                        `}
+                  >
+                    <div className="flex justify-between items-start mb-2">
+                      <h3 className={`font-bold text-lg truncate pr-2 ${isVisited ? 'text-neutral-500 line-through' : 'text-white'}`}>{brewery.name}</h3>
+                      {/* Only show check-in button if logged in */}
+                      {user && (
+                        <div className="shrink-0">
+                          <CheckInButton breweryId={brewery.id} initialVisited={isVisited} />
+                        </div>
+                      )}
+                    </div>
+
+                    <p className="text-sm text-neutral-400 truncate">{brewery.address}, {brewery.city}</p>
+                    {brewery.websiteUrl && (
+                      <a
+                        href={brewery.websiteUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-xs text-amber-500 hover:text-amber-400 mt-2 inline-block"
+                      >
+                        Visit Website &rarr;
+                      </a>
+                    )}
+                  </div>
+                )
+              })}
             </div>
           )}
         </section>
