@@ -1,4 +1,3 @@
-
 'use client'
 
 import { useState } from 'react'
@@ -45,15 +44,15 @@ export function BulkEditor({ breweries, initialCheckedIds }: Props) {
             router.refresh()
             setIsOpen(false)
         } catch (error) {
-            console.error('Failed to save bulk edits', error)
+            console.error('Failed to save', error)
             alert('Something went wrong saving your changes.')
         } finally {
             setIsSaving(false)
         }
     }
 
-    // Derived state for button text
     const isAllSelected = breweries.length > 0 && checkedIds.size === breweries.length
+    const isNoneSelected = checkedIds.size === 0
 
     if (!isOpen) {
         return (
@@ -61,7 +60,7 @@ export function BulkEditor({ breweries, initialCheckedIds }: Props) {
                 onClick={() => setIsOpen(true)}
                 className="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors w-full sm:w-auto text-center"
             >
-                Edit List / Bulk Check-in
+                Edit My List
             </button>
         )
     }
@@ -70,28 +69,33 @@ export function BulkEditor({ breweries, initialCheckedIds }: Props) {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
             <div className="bg-neutral-900 border border-neutral-700 rounded-xl w-full max-w-lg flex flex-col max-h-[90vh] shadow-2xl">
                 {/* Header */}
-                <div className="p-4 border-b border-neutral-800 flex justify-between items-center">
-                    <h2 className="text-lg font-bold text-white">Select Potential Stops</h2>
-                    <button
-                        onClick={() => setIsOpen(false)}
-                        className="text-neutral-400 hover:text-white"
-                        aria-label="Close"
-                    >
-                        ✕
-                    </button>
+                <div className="p-4 border-b border-neutral-800">
+                    <div className="flex justify-between items-center">
+                        <h2 className="text-lg font-bold text-white">Which breweries do you still need?</h2>
+                        <button
+                            onClick={() => setIsOpen(false)}
+                            className="text-neutral-400 hover:text-white"
+                            aria-label="Close"
+                        >
+                            ✕
+                        </button>
+                    </div>
+                    <p className="text-xs text-neutral-500 mt-1">
+                        Check the breweries you still need to visit. Uncheck ones you&apos;ve already been to.
+                    </p>
                 </div>
 
                 {/* Actions */}
                 <div className="p-4 bg-neutral-900/50 flex gap-2 border-b border-neutral-800 sticky top-0 z-10">
                     <button
-                        onClick={isAllSelected ? selectNone : selectAll}
+                        onClick={isNoneSelected ? selectAll : selectNone}
                         className="px-3 py-1.5 text-xs font-medium bg-neutral-800 hover:bg-neutral-700 text-neutral-200 rounded border border-neutral-600 transition-colors"
                     >
-                        {isAllSelected ? "Deselect All" : "Select All (I've been everywhere!)"}
+                        {isNoneSelected ? "Select All (haven't been anywhere)" : "Clear All (been everywhere!)"}
                     </button>
                     <div className="flex-grow"></div>
                     <span className="text-xs text-neutral-400 self-center">
-                        {checkedIds.size} / {breweries.length} Selected
+                        {checkedIds.size} / {breweries.length} remaining
                     </span>
                 </div>
 
@@ -112,7 +116,7 @@ export function BulkEditor({ breweries, initialCheckedIds }: Props) {
                                 onChange={() => toggleBrewery(brewery.id)}
                             />
                             <div className="ml-3 flex-1">
-                                <span className={`block font-medium ${checkedIds.has(brewery.id) ? 'text-amber-100' : 'text-neutral-300'}`}>
+                                <span className={`block font-medium ${checkedIds.has(brewery.id) ? 'text-amber-100' : 'text-neutral-500 line-through'}`}>
                                     {brewery.name}
                                 </span>
                                 {brewery.city && (

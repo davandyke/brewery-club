@@ -29,6 +29,10 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
 
+    if (!user.isApproved) {
+        return NextResponse.json({ error: 'Not approved' }, { status: 403 })
+    }
+
     const existingCheckIn = await prisma.checkIn.findUnique({
         where: {
             userId_breweryId: {

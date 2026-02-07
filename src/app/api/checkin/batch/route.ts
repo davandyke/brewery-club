@@ -11,6 +11,10 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    if (!session.user.isApproved) {
+        return NextResponse.json({ error: 'Not approved' }, { status: 403 })
+    }
+
     try {
         const { breweryIds } = await req.json()
 

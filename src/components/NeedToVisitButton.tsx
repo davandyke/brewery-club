@@ -3,20 +3,19 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 
-interface CheckInButtonProps {
+interface NeedToVisitButtonProps {
     breweryId: string
-    initialVisited: boolean
+    initialNeedsVisit: boolean
 }
 
-export function CheckInButton({ breweryId, initialVisited }: CheckInButtonProps) {
-    const [visited, setVisited] = useState(initialVisited)
+export function NeedToVisitButton({ breweryId, initialNeedsVisit }: NeedToVisitButtonProps) {
+    const [needsVisit, setNeedsVisit] = useState(initialNeedsVisit)
     const [loading, setLoading] = useState(false)
     const router = useRouter()
 
-    const toggleCheckIn = async () => {
+    const toggle = async () => {
         setLoading(true)
-        // Optimistic update
-        setVisited(!visited)
+        setNeedsVisit(!needsVisit)
 
         try {
             const res = await fetch('/api/checkin', {
@@ -29,10 +28,9 @@ export function CheckInButton({ breweryId, initialVisited }: CheckInButtonProps)
                 throw new Error('Failed to update')
             }
 
-            router.refresh() // Refresh server components to update counts/lists
+            router.refresh()
         } catch (error) {
-            // Revert on error
-            setVisited(!visited)
+            setNeedsVisit(needsVisit)
             console.error(error)
         } finally {
             setLoading(false)
@@ -43,23 +41,23 @@ export function CheckInButton({ breweryId, initialVisited }: CheckInButtonProps)
         <button
             onClick={(e) => {
                 e.preventDefault()
-                toggleCheckIn()
+                toggle()
             }}
             disabled={loading}
             className={`px-3 py-1 text-xs font-bold rounded-full border transition-all duration-200 flex items-center gap-1
-        ${visited
-                    ? 'bg-green-600 border-green-500 text-white hover:bg-red-600 hover:border-red-500 hover:text-white group'
+        ${needsVisit
+                    ? 'bg-amber-600 border-amber-500 text-white hover:bg-neutral-700 hover:border-neutral-500 group'
                     : 'bg-transparent border-neutral-600 text-neutral-400 hover:border-amber-500 hover:text-amber-500'
                 }
       `}
         >
-            {visited ? (
+            {needsVisit ? (
                 <>
-                    <span className="group-hover:hidden">Selected</span>
-                    <span className="hidden group-hover:inline">Remove</span>
+                    <span className="group-hover:hidden">Need to Visit</span>
+                    <span className="hidden group-hover:inline">Done</span>
                 </>
             ) : (
-                'Select'
+                'Add Back'
             )}
         </button>
     )
