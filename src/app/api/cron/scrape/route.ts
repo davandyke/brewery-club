@@ -56,23 +56,53 @@ export async function GET(req: Request) {
 
         // 1. Fetch Breweries (Places)
         // Using the exact JSON endpoint discovered: category_ids[]=19870 for Breweries
-        const breweriesData: VisitWidgetPlace[] = await page.evaluate(async () => {
-            const response = await fetch(
-                'https://api.visitwidget.com/api/clients/1037/places?page=1&locale=en&category_ids[]=19870&per_page=100' // Added per_page for safety
-            )
-            return response.json()
-        })
+        let breweriesData: VisitWidgetPlace[] = []
+        let pageNum = 1
+        let keepFetching = true
+
+        while (keepFetching) {
+            console.log(`Fetching breweries page ${pageNum}...`)
+            const newBreweries: VisitWidgetPlace[] = await page.evaluate(async (p) => {
+                const response = await fetch(
+                    `https://api.visitwidget.com/api/clients/1037/places?page=${p}&locale=en&category_ids[]=19870&per_page=100`
+                )
+                return response.json()
+            }, pageNum)
+
+            if (newBreweries && newBreweries.length > 0) {
+                breweriesData = breweriesData.concat(newBreweries)
+                pageNum++
+            } else {
+                keepFetching = false
+            }
+            if (pageNum > 10) keepFetching = false // Safety break
+        }
 
         console.log(`Fetched ${breweriesData?.length} breweries`)
 
         // 2. Fetch Events
         // Using category_ids[]=20014 for Beer Events
-        const eventsData: VisitWidgetEvent[] = await page.evaluate(async () => {
-            const response = await fetch(
-                'https://api.visitwidget.com/api/clients/1037/events?page=1&locale=en&category_ids[]=20014&per_page=100'
-            )
-            return response.json()
-        })
+        let eventsData: VisitWidgetEvent[] = []
+        pageNum = 1
+        keepFetching = true
+
+        while (keepFetching) {
+            console.log(`Fetching events page ${pageNum}...`)
+            const newEvents: VisitWidgetEvent[] = await page.evaluate(async (p) => {
+                const response = await fetch(
+                    `https://api.visitwidget.com/api/clients/1037/events?page=${p}&locale=en&category_ids[]=20014&per_page=100`
+                )
+                return response.json()
+            }, pageNum)
+
+            if (newEvents && newEvents.length > 0) {
+                eventsData = eventsData.concat(newEvents)
+                pageNum++
+            } else {
+                keepFetching = false
+            }
+            if (pageNum > 10) keepFetching = false // Safety break
+        }
 
         console.log(`Fetched ${eventsData?.length} events`)
 

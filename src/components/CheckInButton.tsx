@@ -56,7 +56,7 @@ export function CheckInButton({ breweryId, initialVisited }: CheckInButtonProps)
             {visited ? (
                 <>
                     <span className="group-hover:hidden">✓ Visited</span>
-                    <span className="hidden group-hover:inline">✕ Undo</span>
+                    <span className="hidden group-hover:inline">✕ Unmark</span>
                 </>
             ) : (
                 '+ Mark Visited'

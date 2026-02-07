@@ -7,11 +7,14 @@ import { VeteranModeButton } from '@/components/VeteranModeButton'
 
 export const revalidate = 0 // Dynamic now because of user session
 
+// server component
 export default async function Home() {
   const session = await getServerSession(authOptions)
-  const user = session?.user?.email
+
+  // Fix: Lookup by ID, not email, since email might be missing
+  const user = session?.user?.id
     ? await prisma.user.findUnique({
-      where: { email: session.user.email },
+      where: { id: session.user.id },
       include: { checkIns: true }
     })
     : null
