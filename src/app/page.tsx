@@ -1,5 +1,8 @@
 import { prisma } from '@/lib/prisma'
-import Link from 'next/link'
+
+// Import LoginButton - we might need to make this a client component or import purely
+// But since LoginButton is 'use client', it can be imported in server component 'page.tsx'.
+import { LoginButton } from '@/components/LoginButton'
 
 export const revalidate = 3600 // Revalidate at least every hour
 
@@ -23,7 +26,11 @@ export default async function Home() {
   })
 
   return (
-    <main className="min-h-screen bg-neutral-900 text-neutral-100 p-8 sm:p-24">
+    <main className="min-h-screen bg-neutral-900 text-neutral-100 p-8 sm:p-24 relative">
+      <div className="absolute top-6 right-6">
+        <LoginButton />
+      </div>
+
       <div className="max-w-5xl mx-auto space-y-16">
 
         {/* Header */}

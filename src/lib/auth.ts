@@ -1,0 +1,23 @@
+import { NextAuthOptions } from "next-auth"
+import FacebookProvider from "next-auth/providers/facebook"
+import { PrismaAdapter } from "@next-auth/prisma-adapter"
+import { prisma } from "./prisma"
+
+export const authOptions: NextAuthOptions = {
+    adapter: PrismaAdapter(prisma),
+    providers: [
+        FacebookProvider({
+            clientId: process.env.FACEBOOK_CLIENT_ID!,
+            clientSecret: process.env.FACEBOOK_CLIENT_SECRET!,
+        }),
+    ],
+    callbacks: {
+        async session({ session, user }) {
+            if (session.user) {
+                session.user.id = user.id
+                // Add other custom fields if needed, e.g. isAdmin
+            }
+            return session
+        }
+    }
+}
