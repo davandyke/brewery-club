@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { LoginButton } from '@/components/LoginButton'
 import { CheckInButton } from '@/components/CheckInButton'
-import { VeteranModeButton } from '@/components/VeteranModeButton'
+import { BulkEditor } from '@/components/BulkEditor'
 
 export const revalidate = 0 // Dynamic now because of user session
 
@@ -85,9 +85,12 @@ export default async function Home() {
 
             <div className="flex justify-between items-center bg-neutral-900/50 p-3 rounded-lg">
               <p className="text-sm text-neutral-300">
-                Running low on unchecked boxes?
+                Manage your progress:
               </p>
-              <VeteranModeButton />
+              <BulkEditor
+                breweries={breweries}
+                initialCheckedIds={Array.from(checkInIds)}
+              />
             </div>
           </div>
         )}
