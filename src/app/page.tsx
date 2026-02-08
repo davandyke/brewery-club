@@ -232,6 +232,12 @@ export default async function Home() {
         </section>
 
       </div>
+
+      {/* Footer */}
+      <footer className="max-w-5xl mx-auto mt-16 pt-8 border-t border-neutral-800 text-center text-xs text-neutral-600 space-x-4 pb-8">
+        <a href="/privacy" className="hover:text-neutral-400 transition-colors">Privacy Policy</a>
+        <a href="/terms" className="hover:text-neutral-400 transition-colors">Terms of Service</a>
+      </footer>
     </main>
   )
 }
