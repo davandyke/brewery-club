@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Brewery Social Club",
-  description: "Grand Rapids Brewery Social Club - Track visits and join events.",
+  title: "Brewery Club",
+  description: "Grand Rapids Brewery Club - Track visits and join events.",
 };
 
 export default function RootLayout({

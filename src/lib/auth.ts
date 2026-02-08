@@ -1,6 +1,5 @@
 import { NextAuthOptions } from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
-import EmailProvider from "next-auth/providers/email"
 import { PrismaAdapter } from "@auth/prisma-adapter"
 import { prisma } from "./prisma"
 
@@ -10,42 +9,55 @@ export const authOptions: NextAuthOptions = {
         strategy: "jwt",
     },
     providers: [
-        EmailProvider({
-            server: process.env.EMAIL_SERVER,
-            from: process.env.EMAIL_FROM,
-        }),
         CredentialsProvider({
             name: "Brewsader Code",
             credentials: {
-                name: { label: "Name", type: "text", placeholder: "Jane Doe" },
+                firstName: { label: "First Name", type: "text", placeholder: "Jane" },
+                lastName: { label: "Last Name", type: "text", placeholder: "Doe" },
                 code: { label: "Brewsader Code", type: "password" }
             },
             async authorize(credentials) {
-                if (!credentials?.name || !credentials?.code) {
+                if (!credentials?.firstName || !credentials?.lastName || !credentials?.code) {
                     return null
                 }
 
-                const BREWSADER_CODE = process.env.BREWSADER_CODE
-                if (!BREWSADER_CODE) {
-                    throw new Error("BREWSADER_CODE not configured")
-                }
+                // Default to "BREWSADER" if not set in env
+                const BREWSADER_CODE = process.env.BREWSADER_CODE || "BREWSADER"
+                const ADMIN_CODE = "WHITEPINE"
 
-                if (credentials.code !== BREWSADER_CODE) {
+                const firstName = credentials.firstName.trim()
+                const lastName = credentials.lastName.trim()
+                const fullName = `${firstName} ${lastName}`.trim()
+
+                // Check specific admin credentials
+                const isAdminLogin =
+                    fullName.toLowerCase() === 'david van dyke' &&
+                    credentials.code === ADMIN_CODE
+
+                // Check standard access code
+                const isStandardLogin = credentials.code === BREWSADER_CODE
+
+                if (!isAdminLogin && !isStandardLogin) {
                     return null
                 }
 
                 // Find or create user by name
-                const name = credentials.name.trim()
-
                 let user = await prisma.user.findFirst({
-                    where: { name }
+                    where: { name: { equals: fullName, mode: 'insensitive' } }
                 })
 
                 if (!user) {
                     user = await prisma.user.create({
                         data: {
-                            name,
+                            name: fullName,
+                            isAdmin: isAdminLogin, // Set admin if this was an admin login
                         }
+                    })
+                } else if (isAdminLogin && !user.isAdmin) {
+                    // Upgrade to admin if logging in with admin code
+                    user = await prisma.user.update({
+                        where: { id: user.id },
+                        data: { isAdmin: true }
                     })
                 }
 

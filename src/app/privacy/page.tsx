@@ -9,7 +9,7 @@ export default function PrivacyPolicy() {
 
                 <h2 className="text-2xl font-bold text-white mt-8">1. Introduction</h2>
                 <p>
-                    Welcome to Brewery Social Club ("we", "our", or "us"). We respect your privacy and are committed to protecting your personal data.
+                    Welcome to Brewery Club ("we", "our", or "us"). We respect your privacy and are committed to protecting your personal data.
                     This privacy policy will inform you as to how we look after your personal data when you visit our website (regardless of where you visit it from)
                     and tell you about your privacy rights and how the law protects you.
                 </p>

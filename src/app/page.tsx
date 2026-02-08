@@ -80,7 +80,7 @@ export default async function Home() {
         {/* Header */}
         <div className="text-center space-y-4">
           <h1 className="text-4xl sm:text-6xl font-black tracking-tight text-amber-500">
-            Brewery Social Club
+            Brewery Club
           </h1>
           <p className="text-xl text-neutral-400 max-w-2xl mx-auto">
             Planning our next brewery visit in Grand Rapids, MI.

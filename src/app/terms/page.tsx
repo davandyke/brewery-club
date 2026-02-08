@@ -14,7 +14,7 @@ export default function TermsOfService() {
 
                 <h2 className="text-2xl font-bold text-white mt-8">2. Use License</h2>
                 <p>
-                    Permission is granted to temporarily use the Brewery Social Club website for personal, non-commercial transitory viewing only.
+                    Permission is granted to temporarily use the Brewery Club website for personal, non-commercial transitory viewing only.
                 </p>
                 <p>
                     This license shall automatically terminate if you violate any of these restrictions and may be terminated by us at any time.
@@ -27,7 +27,7 @@ export default function TermsOfService() {
 
                 <h2 className="text-2xl font-bold text-white mt-8">4. Limitations</h2>
                 <p>
-                    In no event shall Brewery Social Club or its suppliers be liable for any damages (including, without limitation, damages for loss of data or profit, or due to business interruption) arising out of the use or inability to use the materials on our website.
+                    In no event shall Brewery Club or its suppliers be liable for any damages (including, without limitation, damages for loss of data or profit, or due to business interruption) arising out of the use or inability to use the materials on our website.
                 </p>
             </section>
         </main>
